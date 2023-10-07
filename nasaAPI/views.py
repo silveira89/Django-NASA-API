@@ -30,9 +30,9 @@ def requestNasaAPI(request):
                             url=data['url'])
             json.save()
             context = {
-                    'title': data.title,
-                    'explanation': data.explanation,
-                    'url': data.url
+                    'title': data['title'],
+                    'explanation': data['explanation'],
+                    'url': data['url']
                     }
             return render(request, 'nasaAPI/home.html', context)
         else:
