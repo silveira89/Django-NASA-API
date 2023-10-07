@@ -1,22 +1,39 @@
 from django.shortcuts import render
 import requests
 from decouple import config
+import datetime
+from .models import NasaJson
 
 # Create your views here.
 
 def requestNasaAPI(request):
-    # URL da API que você deseja consumir
-    api_url = config('API_KEY')
-
-    # Realize a requisição GET
-    response = requests.get(api_url)
-
-    # Verifique o código de status da resposta
-    if response.status_code == 200:
-        # A resposta foi bem-sucedida
-        data = response.json()  # Parseie a resposta JSON
-        # Agora, você pode trabalhar com os dados como desejar
-        return render(request, 'nasaAPI/home.html', data)
+    today = str(datetime.date.today())
+    data = NasaJson.objects.get(date=today)
+    if (data):
+        context = {
+                'title': data.title,
+                'explanation': data.explanation,
+                'url': data.url
+                }
+        return render(request, 'nasaAPI/home.html', context)
     else:
-        # A resposta não foi bem-sucedida
-        return render(request, 'nasaAPI/home.html')
+        api_url = config('API_KEY')
+        response = requests.get(api_url)
+        if response.status_code == 200:
+            data = response.json()  # Parseie a resposta JSON
+            json = NasaJson(date=data['date'],
+                            explanation=data['explanation'],
+                            hdurl=data['hdurl'],
+                            mediaType=data['media_type'],
+                            serviceVersion=data['service_version'],
+                            title=data['title'],
+                            url=data['url'])
+            json.save()
+            context = {
+                    'title': data.title,
+                    'explanation': data.explanation,
+                    'url': data.url
+                    }
+            return render(request, 'nasaAPI/home.html', context)
+        else:
+            return render(request, 'nasaAPI/home.html')
