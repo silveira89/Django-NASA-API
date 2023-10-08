@@ -8,12 +8,12 @@ from .models import NasaJson
 
 def requestNasaAPI(request):
     today = str(datetime.date.today())
-    data = NasaJson.objects.get(date=today)
+    data = NasaJson.objects.filter(date=today)
     if (data):
         context = {
-                'title': data.title,
-                'explanation': data.explanation,
-                'url': data.url
+                'title': data[0].title,
+                'explanation': data[0].explanation,
+                'url': data[0].url
                 }
         return render(request, 'nasaAPI/home.html', context)
     else:
